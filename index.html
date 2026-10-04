@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevBuddy AI | Hacktoberfest 2026: Build for a Friend</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="ambient-glow orb-cyan"></div>
+    <div class="ambient-glow orb-purple"></div>
+
+    <div class="app-layout">
+        <!-- Header -->
+        <header class="navbar">
+            <div class="brand">
+                <span class="brand-icon">⚡</span>
+                <span class="brand-name">DevBuddy<span class="text-accent">.ai</span></span>
+            </div>
+            <div class="challenge-tag">
+                <span class="live-beacon"></span>
+                <span>Hacktoberfest Weekend Challenge • Build for a Friend</span>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workbench">
+            <!-- Left Side: Input Workspace -->
+            <section class="panel editor-panel">
+                <div class="panel-header">
+                    <h2><span class="icon">🛠️</span> Pair With Your Friend</h2>
+                    <span class="badge-subtle">Open-Source AI (Qwen / Llama / DeepSeek)</span>
+                </div>
+
+                <form id="debugForm" onsubmit="event.preventDefault(); submitDebugRequest();">
+                    <div class="grid-2">
+                        <div class="field">
+                            <label for="friendName">Friend's Name</label>
+                            <input type="text" id="friendName" placeholder="e.g. Alex, Sam, David" required>
+                        </div>
+                        <div class="field">
+                            <label for="language">Language / Stack</label>
+                            <select id="language">
+                                <option value="Java">Java</option>
+                                <option value="JavaScript / TypeScript">JavaScript / TypeScript</option>
+                                <option value="Python">Python</option>
+                                <option value="React / Next.js">React / Next.js</option>
+                                <option value="C++ / C">C++ / C</option>
+                                <option value="Go">Go</option>
+                                <option value="Rust">Rust</option>
+                                <option value="SQL">SQL</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="mode">Pair Programming Persona</label>
+                        <select id="mode">
+                            <option value="Patient Senior Dev">☕ Patient Senior Dev (Clear, gentle explanation & clean fix)</option>
+                            <option value="Playful Code Roast & Cheer">🔥 Playful Code Roast & Cheer (Fun banter + rock-solid fix)</option>
+                            <option value="Speed & Big-O Optimizer">🚀 Performance & Clean Code Guru (Refactor & speed tips)</option>
+                            <option value="Explain Like I'm Five">🐣 Explain Like I'm Five (Demystifies confusing stack traces)</option>
+                        </select>
+                    </div>
+
+                    <div class="field">
+                        <label for="errorMessage">Error / Stack Trace / Mystery Bug</label>
+                        <input type="text" id="errorMessage" placeholder="e.g. java.lang.NullPointerException at line 42" required>
+                        <div class="preset-chips">
+                            <button type="button" class="chip" onclick="applyPreset('NullPointerException', 'String data = user.getProfile().getEmail();\nSystem.out.println(data.toLowerCase());')">NullPointer</button>
+                            <button type="button" class="chip" onclick="applyPreset('Access to fetch at api from origin has been blocked by CORS policy', 'fetch(\'http://localhost:8080/api\')\n  .then(res => res.json())\n  .catch(console.error);')">CORS Error</button>
+                            <button type="button" class="chip" onclick="applyPreset('TypeError: Cannot read properties of undefined (reading map)', 'const items = response.data;\nreturn items.map(i => <li>{i.name}</li>);')">Undefined Map</button>
+                            <button type="button" class="chip" onclick="applyPreset('Segmentation fault (core dumped)', 'int *ptr = NULL;\n*ptr = 100;')">SegFault</button>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="codeSnippet">Buggy Code Snippet</label>
+                        <textarea id="codeSnippet" class="code-font" rows="6" placeholder="// Paste the code snippet your friend is struggling with..." required></textarea>
+                    </div>
+
+                    <!-- AI Backend Controls -->
+                    <details class="model-settings">
+                        <summary>🤖 Open-Source AI Configuration (Ollama / Hugging Face)</summary>
+                        <div class="settings-drawer">
+                            <div class="grid-2">
+                                <div class="field">
+                                    <label for="provider">Provider</label>
+                                    <select id="provider" onchange="toggleProvider()">
+                                        <option value="ollama">Ollama (Local Open Weights: 100% Free & Private)</option>
+                                        <option value="huggingface">Hugging Face Inference (Open-Weights Cloud)</option>
+                                        <option value="offline">Built-in Offline Analyzer (Zero Setup)</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="model">Model Name</label>
+                                    <input type="text" id="model" value="qwen2.5-coder">
+                                </div>
+                            </div>
+                            <div class="field" id="hfKeyField" style="display: none;">
+                                <label for="apiKey">Hugging Face API Token</label>
+                                <input type="password" id="apiKey" placeholder="hf_xxxxxxxxxxxxxxxxxxxx">
+                            </div>
+                        </div>
+                    </details>
+
+                    <button type="submit" id="submitBtn" class="btn-action">
+                        <span id="btnLabel">🚀 Debug & Rescue My Friend</span>
+                        <span id="btnLoader" class="loader" style="display: none;"></span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Right Side: Solution Showcase -->
+            <section class="panel solution-panel">
+                <div class="panel-header">
+                    <h2><span class="icon">💡</span> Dev Care Package</h2>
+                    <div class="panel-tools" id="panelTools" style="display: none;">
+                        <button class="btn-tool" onclick="copyCarePackage()">📋 Copy for Discord/Slack</button>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div id="emptyView" class="empty-view">
+                    <div class="duck-icon">🦆</div>
+                    <h3>Your Friend's AI Rubber Duck is Ready</h3>
+                    <p>Enter your friend's code or error on the left to generate an instant root-cause analysis, working code fix, and a personalized friendship debug coupon.</p>
+                </div>
+
+                <!-- Solution Output -->
+                <div id="solutionView" class="solution-view" style="display: none;">
+                    <div id="markdownOutput" class="analysis-content"></div>
+
+                    <!-- Debug Voucher -->
+                    <div class="voucher-ticket" id="voucherTicket">
+                        <div class="ticket-header">
+                            <span class="ticket-type">DEVBUDDY VIP DEBUG PASS</span>
+                            <span class="ticket-id">HF26-BFF-PASS</span>
+                        </div>
+                        <h4 id="voucherHeading">1x Free Emergency Pair-Programming Pass</h4>
+                        <p id="voucherNote">Valid for 30 minutes of no-judgment screen sharing, rubber ducking, and coffee/snack delivery.</p>
+                        <div class="ticket-footer">
+                            <span class="ticket-rule">No Expiration • Unlimited Laughs</span>
+                            <span class="ticket-signature" id="ticketSignature">Issued for: Friend ❤️</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <p>
+                <strong>DevBuddy AI</strong> • Hacktoberfest 2026 Weekend Challenge (Build for a Friend).
+                Built with <strong>Java (Native HTTP Server)</strong>, <strong>HTML5</strong>, and <strong>CSS</strong>.
+            </p>
+        </footer>
+    </div>
+
+    <!-- Inline script maintaining the strictly 3-file setup -->
+    <script>
+        function applyPreset(error, code) {
+            document.getElementById('errorMessage').value = error;
+            document.getElementById('codeSnippet').value = code;
+        }
+
+        function toggleProvider() {
+            const provider = document.getElementById('provider').value;
+            const hfField = document.getElementById('hfKeyField');
+            const modelInput = document.getElementById('model');
+
+            if (provider === 'huggingface') {
+                hfField.style.display = 'block';
+                modelInput.value = 'Qwen/Qwen2.5-Coder-7B-Instruct';
+            } else if (provider === 'ollama') {
+                hfField.style.display = 'none';
+                modelInput.value = 'qwen2.5-coder';
+            } else {
+                hfField.style.display = 'none';
+                modelInput.value = 'offline-analyzer';
+            }
+        }
+
+        async function submitDebugRequest() {
+            const friendName = document.getElementById('friendName').value.trim() || 'Friend';
+            const language = document.getElementById('language').value;
+            const mode = document.getElementById('mode').value;
+            const errorMessage = document.getElementById('errorMessage').value.trim();
+            const codeSnippet = document.getElementById('codeSnippet').value.trim();
+            const provider = document.getElementById('provider').value;
+            const model = document.getElementById('model').value.trim();
+            const apiKey = document.getElementById('apiKey').value.trim();
+
+            const btnLabel = document.getElementById('btnLabel');
+            const btnLoader = document.getElementById('btnLoader');
+            const submitBtn = document.getElementById('submitBtn');
+
+            btnLabel.textContent = "Analyzing Code & Crafting Rescue...";
+            btnLoader.style.display = "inline-block";
+            submitBtn.disabled = true;
+
+            const payload = {
+                friendName, language, mode, errorMessage, codeSnippet, provider, model, apiKey
+            };
+
+            try {
+                let responseText = "";
+                if (window.location.protocol.startsWith('http')) {
+                    const res = await fetch('/api/analyze', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) throw new Error("HTTP " + res.status);
+                    const data = await res.json();
+                    responseText = data.reply;
+                } else {
+                    responseText = localClientAnalysis(friendName, language, mode, errorMessage, codeSnippet);
+                }
+
+                displayAnalysis(friendName, responseText);
+            } catch (err) {
+                console.warn("Backend unavailable:", err);
+                const fallback = localClientAnalysis(friendName, language, mode, errorMessage, codeSnippet);
+                displayAnalysis(friendName, fallback + "\n\n*(Note: Rendered via built-in smart analyzer. Run `App.java` with Ollama for full open-weights code generation!)*");
+            } finally {
+                btnLabel.textContent = "🚀 Debug & Rescue My Friend";
+                btnLoader.style.display = "none";
+                submitBtn.disabled = false;
+            }
+        }
+
+        function displayAnalysis(name, md) {
+            document.getElementById('emptyView').style.display = 'none';
+            document.getElementById('solutionView').style.display = 'block';
+            document.getElementById('panelTools').style.display = 'flex';
+
+            // Markdown parser
+            let html = md
+                .replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>')
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/gim, '<em>$1</em>')
+                .replace(/^> (.*$)/gim, '<blockquote>$1</blockquote>')
+                .replace(/^\d+\.\s+(.*$)/gim, '<div class="step-line">$1</div>')
+                .replace(/\n\n/gim, '<p></p>')
+                .replace(/\n/gim, '<br>');
+
+            document.getElementById('markdownOutput').innerHTML = html;
+            document.getElementById('ticketSignature').innerText = "Issued for: " + name + " ❤️";
+            document.getElementById('solutionView').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function localClientAnalysis(name, lang, mode, err, code) {
+            const hasNull = (err + code).toLowerCase().includes('null') || (err + code).toLowerCase().includes('undefined');
+            const hasCors = (err + code).toLowerCase().includes('cors');
+
+            let body = `### ☕ Hey ${name}, Don't Sweat It!\n\n`
+                + `**Persona:** *${mode}* | **Language:** *${lang}*\n\n`
+                + `### 🔍 Root Cause Analysis\n`;
+
+            if (hasCors) {
+                body += `This is a Cross-Origin Resource Sharing (CORS) conflict. The browser prevents your frontend from reading the API response because the server didn't explicitly authorize your origin.\n\n`
+                     + `### 🛠️ The Fix\n`
+                     + `Add the proper origin header to your server response:\n`
+                     + `\`\`\`\n`
+                     + `Access-Control-Allow-Origin: *\n`
+                     + `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS\n`
+                     + `\`\`\`\n`;
+            } else if (hasNull) {
+                body += `You encountered a Null/Undefined dereference. Your program tried to read a property or call a method on a variable that hasn't been instantiated yet.\n\n`
+                     + `### 🛠️ The Fix\n`
+                     + `Add safe optional chaining or a defensive guard clause before calling the method:\n`
+                     + `\`\`\`\n`
+                     + `if (data != null && data.isValid()) {\n`
+                     + `    data.process();\n`
+                     + `}\n`
+                     + `\`\`\`\n`;
+            } else {
+                body += `The code hit a runtime exception while processing state in ${lang}. Isolate the input parameters right before the failing line.\n\n`
+                     + `### 🛠️ The Fix\n`
+                     + `Validate your inputs before passing them into the routine and check array/collection bounds.\n`;
+            }
+
+            body += `### 💡 Senior Dev Advice for ${name}\n`
+                 + `Remember: every great engineer spends hours tracking down tiny typos. Step away for 5 minutes, grab a drink, and come back with fresh eyes!\n\n`
+                 + `### 🎟️ Friendship Debug Voucher\n`
+                 + `> **VOUCHER:** 1x Free 30-Min Discord Rubber-Ducking Session & Snack Delivery 🍕`;
+
+            return body;
+        }
+
+        function copyCarePackage() {
+            const text = document.getElementById('markdownOutput').innerText;
+            const voucher = document.getElementById('voucherTicket').innerText;
+            const combined = text + "\n\n" + "--- FRIENDSHIP VOUCHER ---\n" + voucher;
+
+            navigator.clipboard.writeText(combined).then(() => {
+                alert("Copied Dev Care Package to clipboard! Send it to your friend on Discord, Slack, or WhatsApp 🚀");
+            });
+        }
+    </script>
+</body>
+</html>
